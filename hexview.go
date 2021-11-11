@@ -16,9 +16,10 @@ type HexView struct {
 func New() *HexView {
 	scrollArea := *widgets.NewQAbstractScrollArea(nil)
 	ch := core.NewQChar8(core.NewQLatin1Char("9"))
+	charWidth := scrollArea.FontMetrics().HorizontalAdvance2(ch)
 	return &HexView{
 		QAbstractScrollArea: scrollArea,
-		charWidth:           scrollArea.FontMetrics().HorizontalAdvance2(ch),
+		charWidth:           charWidth,
 	}
 }
 
