@@ -3,16 +3,23 @@ package main
 import (
 	"os"
 
+	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/widgets"
 )
 
 type HexView struct {
 	widgets.QAbstractScrollArea
+	charWidth int
 }
 
 func New() *HexView {
-	return &HexView{QAbstractScrollArea: *widgets.NewQAbstractScrollArea(nil)}
+	scrollArea := *widgets.NewQAbstractScrollArea(nil)
+	ch := core.NewQChar8(core.NewQLatin1Char("9"))
+	return &HexView{
+		QAbstractScrollArea: scrollArea,
+		charWidth:           scrollArea.FontMetrics().HorizontalAdvance2(ch),
+	}
 }
 
 func (self *HexView) Show() {
