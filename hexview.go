@@ -58,13 +58,13 @@ func (self *HexView) Show() {
 		asciiPos := hexPos + BytesPerLine*3*self.charW + GapHexAreaAsciiArea
 		linePos := asciiPos - (GapHexAreaAsciiArea / 2)
 		self.painter.DrawLine3(linePos, event.Rect().Top(), linePos, self.Height())
-		for line := 0; line < 5; line++ {
+		for line := 0; line < 10; line++ {
 			yPos := (line + 1) * self.charH
-			addr := fmt.Sprintf("%08x", line*BytesPerLine)
+			addr := fmt.Sprintf("%08X", line*BytesPerLine)
 			self.drawText(0, yPos, addr)
 			xPos := hexPos
 			for i := 0; i < BytesPerLine; i++ {
-				hex := fmt.Sprintf("%02x", self.data[line*BytesPerLine+i])
+				hex := fmt.Sprintf("%02X", self.data[line*BytesPerLine+i])
 				self.drawText(xPos, yPos, hex)
 				xPos += 3 * self.charW
 			}
