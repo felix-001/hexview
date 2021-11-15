@@ -53,7 +53,7 @@ func (self *HexView) drawText(x, y int, s string) {
 func (self *HexView) Show() {
 	self.ConnectPaintEvent(func(event *gui.QPaintEvent) {
 		self.painter = gui.NewQPainter2(self.Viewport())
-		self.painter.SetPen2(gui.NewQColor2(core.Qt__black))
+		//self.painter.SetPen2(gui.NewQColor2(core.Qt__black))
 		hexPos := AddrAreaLen*self.charW + GapAddrAreaHexArea
 		asciiPos := hexPos + BytesPerLine*3*self.charW + GapHexAreaAsciiArea
 		linePos := asciiPos - (GapHexAreaAsciiArea / 2)
@@ -62,27 +62,10 @@ func (self *HexView) Show() {
 			yPos := (line + 1) * self.charH
 			addr := fmt.Sprintf("%08x", line*BytesPerLine)
 			self.drawText(0, yPos, addr)
-			/*
-				x := 0
-				for i := 0; i < 8; i++ {
-					rect := core.NewQRect4(x, yPos, self.charW, self.charH)
-					self.painter.DrawText4(rect, int(core.Qt__AlignHCenter|core.Qt__AlignVCenter), string(addr[i]), nil)
-					//painter.DrawText3(x, yPos, string(addr[i]))
-					x += self.charW
-				}
-			*/
-			//painter.DrawText3(0, yPos, fmt.Sprintf("%08x", line*BytesPerLine))
 			xPos := hexPos
 			for i := 0; i < BytesPerLine; i++ {
-				self.drawText(xPos, yPos, fmt.Sprintf("%02x", self.data[line*BytesPerLine+i]&0xf0))
-				/*
-					rect := core.NewQRect4(xPos, yPos, self.charW, self.charH)
-					painter.DrawText4(rect, int(core.Qt__AlignHCenter|core.Qt__AlignVCenter), fmt.Sprintf("%x", self.data[line*BytesPerLine+i]&0xf0>>4), nil)
-					rect = core.NewQRect4(xPos+self.charW, yPos, self.charW, self.charH)
-					painter.DrawText4(rect, int(core.Qt__AlignHCenter|core.Qt__AlignVCenter), fmt.Sprintf("%x", self.data[line*BytesPerLine+i]&0x0f), nil)
-				*/
-				//painter.DrawText3(xPos, yPos, fmt.Sprintf("%x", self.data[line*BytesPerLine+i]&0xf0>>4))
-				//painter.DrawText3(xPos+self.charW, yPos, fmt.Sprintf("%x", self.data[line*BytesPerLine+i]&0x0f))
+				hex := fmt.Sprintf("%02x", self.data[line*BytesPerLine+i])
+				self.drawText(xPos, yPos, hex)
 				xPos += 3 * self.charW
 			}
 		}
