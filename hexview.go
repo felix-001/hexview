@@ -10,10 +10,11 @@ import (
 )
 
 const (
-	AddrAreaLen         = 10
-	GapAddrAreaHexArea  = 10 // 地址区域和hex区域之间的长度
+	AddrAreaLen         = 8
+	GapAddrAreaHexArea  = 16 // 地址区域和hex区域之间的长度
 	GapHexAreaAsciiArea = 16 // hex区域和ascii区域之间的长度
 	BytesPerLine        = 16 // 一行显示16个字节
+	AddrStartPos        = 8  // 地址区域偏移
 )
 
 type HexView struct {
@@ -54,19 +55,22 @@ func (self *HexView) Show() {
 	self.ConnectPaintEvent(func(event *gui.QPaintEvent) {
 		self.painter = gui.NewQPainter2(self.Viewport())
 		//self.painter.SetPen2(gui.NewQColor2(core.Qt__black))
-		hexPos := AddrAreaLen*self.charW + GapAddrAreaHexArea
-		asciiPos := hexPos + BytesPerLine*3*self.charW + GapHexAreaAsciiArea
+		hexPos := AddrStartPos + AddrAreaLen*self.charW + GapAddrAreaHexArea
+		firstLinePos := hexPos - (GapAddrAreaHexArea / 2)
+		self.painter.DrawLine3(firstLinePos, event.Rect().Top(), firstLinePos, self.Height())
+		// -1 ： 最后一个空格
+		asciiPos := hexPos + (BytesPerLine*3-1)*self.charW + GapHexAreaAsciiArea
 		linePos := asciiPos - (GapHexAreaAsciiArea / 2)
 		self.painter.DrawLine3(linePos, event.Rect().Top(), linePos, self.Height())
-		for line := 0; line < 10; line++ {
-			yPos := (line + 1) * self.charH
+		for line := 0; line < 40; line++ {
+			//yPos := line * self.charH
 			addr := fmt.Sprintf("%08X", line*BytesPerLine)
-			self.drawText(0, yPos, addr)
-			xPos := hexPos
+			self.drawText(AddrStartPos, line*self.charH, addr)
+			//xPos := hexPos
 			for i := 0; i < BytesPerLine; i++ {
 				hex := fmt.Sprintf("%02X", self.data[line*BytesPerLine+i])
-				self.drawText(xPos, yPos, hex)
-				xPos += 3 * self.charW
+				self.drawText(hexPos+i*3*self.charW, line*self.charH, hex)
+				//xPos += 3 * self.charW
 			}
 		}
 	})
@@ -74,6 +78,13 @@ func (self *HexView) Show() {
 
 func main() {
 	testStr := `
+	QPainter performs low-level painting on widgets and other paint devices. The class can draw everything from simple lines to complex shapes like pies and chords. It can also draw aligned text and pixmaps. Normally, it draws in a "natural" coordinate system, but it can in addition do view and world transformation.
+	QPainter performs low-level painting on widgets and other paint devices. The class can draw everything from simple lines to complex shapes like pies and chords. It can also draw aligned text and pixmaps. Normally, it draws in a "natural" coordinate system, but it can in addition do view and world transformation.
+	QPainter performs low-level painting on widgets and other paint devices. The class can draw everything from simple lines to complex shapes like pies and chords. It can also draw aligned text and pixmaps. Normally, it draws in a "natural" coordinate system, but it can in addition do view and world transformation.
+	QPainter performs low-level painting on widgets and other paint devices. The class can draw everything from simple lines to complex shapes like pies and chords. It can also draw aligned text and pixmaps. Normally, it draws in a "natural" coordinate system, but it can in addition do view and world transformation.
+	QPainter performs low-level painting on widgets and other paint devices. The class can draw everything from simple lines to complex shapes like pies and chords. It can also draw aligned text and pixmaps. Normally, it draws in a "natural" coordinate system, but it can in addition do view and world transformation.
+	QPainter performs low-level painting on widgets and other paint devices. The class can draw everything from simple lines to complex shapes like pies and chords. It can also draw aligned text and pixmaps. Normally, it draws in a "natural" coordinate system, but it can in addition do view and world transformation.
+	QPainter performs low-level painting on widgets and other paint devices. The class can draw everything from simple lines to complex shapes like pies and chords. It can also draw aligned text and pixmaps. Normally, it draws in a "natural" coordinate system, but it can in addition do view and world transformation.
 	QPainter performs low-level painting on widgets and other paint devices. The class can draw everything from simple lines to complex shapes like pies and chords. It can also draw aligned text and pixmaps. Normally, it draws in a "natural" coordinate system, but it can in addition do view and world transformation.
 `
 
