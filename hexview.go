@@ -19,10 +19,14 @@ const (
 
 type HexView struct {
 	widgets.QAbstractScrollArea
-	charW   int
-	charH   int
-	data    []byte
-	painter *gui.QPainter
+	charW         int
+	charH         int
+	hexPos        int
+	firstLinePos  int
+	secondLinePos int
+	asciiPos      int
+	data          []byte
+	painter       *gui.QPainter
 }
 
 func New(data []byte) *HexView {
@@ -30,12 +34,21 @@ func New(data []byte) *HexView {
 	ch := core.NewQChar8(core.NewQLatin1Char("9"))
 	charW := scrollArea.FontMetrics().HorizontalAdvance2(ch)
 	charH := scrollArea.FontMetrics().Height()
+	hexPos := AddrStartPos + AddrAreaLen*charW + GapAddrAreaHexArea
+	firstLinePos := hexPos - (GapAddrAreaHexArea / 2)
+	// -1 : 最后一个空格
+	asciiPos := hexPos + (BytesPerLine*3-1)*charW + GapHexAreaAsciiArea
+	secondLinePos := asciiPos - (GapHexAreaAsciiArea / 2)
 	return &HexView{
 		QAbstractScrollArea: scrollArea,
 		charW:               charW,
 		charH:               charH,
 		data:                data,
-		painter:             nil, //gui.NewQPainter2(scrollArea.Viewport()),
+		painter:             nil,
+		hexPos:              hexPos,
+		firstLinePos:        firstLinePos,
+		asciiPos:            asciiPos,
+		secondLinePos:       secondLinePos,
 	}
 }
 
@@ -51,26 +64,19 @@ func (self *HexView) drawText(x, y int, s string) {
 	}
 }
 
+func (self *HexView) addr2Text(addr int) string {
+	return fmt.Sprintf("%08X", addr)
+}
+
 func (self *HexView) Show() {
 	self.ConnectPaintEvent(func(event *gui.QPaintEvent) {
 		self.painter = gui.NewQPainter2(self.Viewport())
-		//self.painter.SetPen2(gui.NewQColor2(core.Qt__black))
-		hexPos := AddrStartPos + AddrAreaLen*self.charW + GapAddrAreaHexArea
-		firstLinePos := hexPos - (GapAddrAreaHexArea / 2)
-		self.painter.DrawLine3(firstLinePos, event.Rect().Top(), firstLinePos, self.Height())
-		// -1 ： 最后一个空格
-		asciiPos := hexPos + (BytesPerLine*3-1)*self.charW + GapHexAreaAsciiArea
-		linePos := asciiPos - (GapHexAreaAsciiArea / 2)
-		self.painter.DrawLine3(linePos, event.Rect().Top(), linePos, self.Height())
+		self.painter.DrawLine3(self.firstLinePos, event.Rect().Top(), self.firstLinePos, self.Height())
+		self.painter.DrawLine3(self.secondLinePos, event.Rect().Top(), self.secondLinePos, self.Height())
 		for line := 0; line < 40; line++ {
-			//yPos := line * self.charH
-			addr := fmt.Sprintf("%08X", line*BytesPerLine)
-			self.drawText(AddrStartPos, line*self.charH, addr)
-			//xPos := hexPos
+			self.drawText(AddrStartPos, line*self.charH, self.addr2Text(line*BytesPerLine))
 			for i := 0; i < BytesPerLine; i++ {
-				hex := fmt.Sprintf("%02X", self.data[line*BytesPerLine+i])
-				self.drawText(hexPos+i*3*self.charW, line*self.charH, hex)
-				//xPos += 3 * self.charW
+				self.drawText(self.hexPos+i*3*self.charW, line*self.charH, fmt.Sprintf("%02X", self.data[line*BytesPerLine+i]))
 			}
 		}
 	})
