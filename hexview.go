@@ -53,14 +53,14 @@ func New(data []byte) *HexView {
 	}
 }
 
-func (self *HexView) drawChar(painter *gui.QPainter, x, y int, c string) {
+func (self *HexView) drawChar(x, y int, c string) {
 	rect := core.NewQRect4(x, y, self.charW, self.charH)
-	painter.DrawText4(rect, int(core.Qt__AlignHCenter|core.Qt__AlignVCenter), c, nil)
+	self.painter.DrawText4(rect, int(core.Qt__AlignHCenter|core.Qt__AlignVCenter), c, nil)
 }
 
-func (self *HexView) drawText(painter *gui.QPainter, x, y int, s string) {
+func (self *HexView) drawText(x, y int, s string) {
 	for _, ch := range s {
-		self.drawChar(painter, x, y, string(ch))
+		self.drawChar(x, y, string(ch))
 		x += self.charW
 	}
 }
@@ -71,27 +71,21 @@ func (self *HexView) addr2Text(addr int) string {
 
 func (self *HexView) Show() {
 	self.ConnectPaintEvent(func(event *gui.QPaintEvent) {
-		//log.Println("ConnectPaintEvent")
-		//if self.painter == nil {
-		//self.painter = gui.NewQPainter2(self.Viewport())
 		self.painter = gui.NewQPainter2(self.Viewport())
-		//}
 		self.VerticalScrollBar().SetPageStep(self.Viewport().Height() / self.charH)
 		self.VerticalScrollBar().SetRangeDefault(0, 1000)
-		//self.painter.DrawLine3(self.firstLinePos, event.Rect().Top(), self.firstLinePos, self.Height())
-		//self.painter.DrawLine3(self.secondLinePos, event.Rect().Top(), self.secondLinePos, self.Height())
 		self.painter.DrawLine3(self.firstLinePos, event.Rect().Top(), self.firstLinePos, self.Height())
 		self.painter.DrawLine3(self.secondLinePos, event.Rect().Top(), self.secondLinePos, self.Height())
 		for line := 0; line < 60; line++ {
-			self.drawText(self.painter, AddrStartPos, line*self.charH, self.addr2Text(line*BytesPerLine))
+			self.drawText(AddrStartPos, line*self.charH, self.addr2Text(line*BytesPerLine))
 			for i := 0; i < BytesPerLine; i++ {
-				self.drawText(self.painter, self.hexPos+i*3*self.charW, line*self.charH, fmt.Sprintf("%02X", self.data[line*BytesPerLine+i]))
+				self.drawText(self.hexPos+i*3*self.charW, line*self.charH, fmt.Sprintf("%02X", self.data[line*BytesPerLine+i]))
 				b := self.data[line*BytesPerLine+i]
 				ascii := string(b)
 				if b < 0x20 || b > 0x7e {
 					ascii = "."
 				}
-				self.drawChar(self.painter, self.asciiPos+i*self.charW, line*self.charH, ascii)
+				self.drawChar(self.asciiPos+i*self.charW, line*self.charH, ascii)
 			}
 		}
 		self.painter.End()
