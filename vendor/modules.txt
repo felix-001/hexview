@@ -8,3 +8,5 @@ github.com/therecipe/qt/gui
 github.com/therecipe/qt/internal
 github.com/therecipe/qt/interop/gow
 github.com/therecipe/qt/widgets
+# github.com/therecipe/qt/internal/binding/files/docs/5.13.0 v0.0.0-20200904063919-c0c124a5770d
+## explicit

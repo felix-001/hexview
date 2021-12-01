@@ -76,6 +76,7 @@ func (self *HexView) Show() {
 		self.VerticalScrollBar().SetRangeDefault(0, 1000)
 		self.painter.DrawLine3(self.firstLinePos, event.Rect().Top(), self.firstLinePos, self.Height())
 		self.painter.DrawLine3(self.secondLinePos, event.Rect().Top(), self.secondLinePos, self.Height())
+		self.painter.FillRect5(100, 60, 100, 50, gui.NewQColor2(core.Qt__lightGray))
 		for line := 0; line < 60; line++ {
 			self.drawText(AddrStartPos, line*self.charH, self.addr2Text(line*BytesPerLine))
 			for i := 0; i < BytesPerLine; i++ {
