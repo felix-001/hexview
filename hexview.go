@@ -69,8 +69,8 @@ func (self *HexView) addr2Text(addr int) string {
 
 func (self *HexView) drawBasic(event *gui.QPaintEvent) {
 	self.painter = gui.NewQPainter2(self.Viewport())
-	self.VerticalScrollBar().SetPageStep(self.Viewport().Height() / self.charH)
-	self.VerticalScrollBar().SetRangeDefault(0, 100)
+	self.VerticalScrollBar().SetPageStep(self.Viewport().Size().Height() / self.charH)
+	self.VerticalScrollBar().SetRange(0, 30)
 	self.painter.DrawLine3(self.firstLinePos, event.Rect().Top(), self.firstLinePos, self.Height())
 	self.painter.DrawLine3(self.secondLinePos, event.Rect().Top(), self.secondLinePos, self.Height())
 }
@@ -81,16 +81,17 @@ func (self *HexView) Show(data []byte) {
 		self.drawBasic(event)
 		self.painter.FillRect5(100, 60, 100, 50, gui.NewQColor2(core.Qt__lightGray))
 		nbLine := len(data) / BytesPerLine
-		for line := 0; line < nbLine; line++ {
-			self.drawText(AddrStartPos, line*self.charH, self.addr2Text(line*BytesPerLine))
+		lineIdx := self.VerticalScrollBar().Value()
+		for line := lineIdx; line < nbLine; line++ {
+			self.drawText(AddrStartPos, (line-lineIdx)*self.charH, self.addr2Text(line*BytesPerLine))
 			for i := 0; i < BytesPerLine; i++ {
-				self.drawText(self.hexPos+i*3*self.charW, line*self.charH, fmt.Sprintf("%02X", data[line*BytesPerLine+i]))
+				self.drawText(self.hexPos+i*3*self.charW, (line-lineIdx)*self.charH, fmt.Sprintf("%02X", data[line*BytesPerLine+i]))
 				b := data[line*BytesPerLine+i]
 				ascii := string(b)
 				if b < 0x20 || b > 0x7e {
 					ascii = "."
 				}
-				self.drawChar(self.asciiPos+i*self.charW, line*self.charH, ascii)
+				self.drawChar(self.asciiPos+i*self.charW, (line-lineIdx)*self.charH, ascii)
 			}
 		}
 		self.painter.End()
