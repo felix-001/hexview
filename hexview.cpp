@@ -1,6 +1,10 @@
 #include <QApplication>
 #include <QMainWindow>
+#include <QScrollBar>
+#include <QPainter>
+#include <QPaintEvent>
 #include <QAbstractScrollArea>
+#include <stdio.h>
 
 enum {
 	kAddrAreaLen         = 8,
@@ -24,6 +28,8 @@ public:
 	~HexView();
 protected:
 	void paintEvent(QPaintEvent *event);
+private:
+	void drawBasic(QPainter *painter, QPaintEvent *event);
 };
 
 HexView::HexView()
@@ -45,8 +51,20 @@ HexView::~HexView()
 
 }
 
+void HexView::drawBasic(QPainter *painter, QPaintEvent *event)
+{
+	printf("drawBasic\n");
+	verticalScrollBar()->setPageStep(viewport()->size().height() / char_h_);
+	verticalScrollBar()->setRange(0, 30);
+	painter->drawLine(first_line_pos_, event->rect().top(), first_line_pos_, height());
+	painter->drawLine(second_line_pos_, event->rect().top(), first_line_pos_, height());
+}
+
 void HexView::paintEvent(QPaintEvent *event)
 {
+	QPainter painter(viewport());
+	painter.drawLine(first_line_pos_, event->rect().top(), first_line_pos_, height());
+	drawBasic(&painter, event);
 
 }
 
@@ -56,6 +74,8 @@ int main(int argc, char *argv[])
 	QMainWindow window;
 	window.setMinimumSize(620, 700);
 	window.setWindowTitle("hexview");
+	HexView *hexView = new HexView;
+	window.setCentralWidget(hexView);
 	window.show();
 	return app.exec();
  }
