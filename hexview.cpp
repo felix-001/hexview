@@ -24,9 +24,6 @@ public:
 	~HexView();
 protected:
 	void paintEvent(QPaintEvent *event);
-	void keyPressEvent(QKeyEvent *event);
-	void mouseMoveEvent(QMouseEvent *event);
-	void mousePressEvent(QMouseEvent *event);
 };
 
 HexView::HexView()
@@ -49,20 +46,6 @@ HexView::~HexView()
 }
 
 void HexView::paintEvent(QPaintEvent *event)
-{
-
-}
-void HexView::keyPressEvent(QKeyEvent *event)
-{
-
-}
-
-void HexView::mouseMoveEvent(QMouseEvent *event)
-{
-
-}
-
-void HexView::mousePressEvent(QMouseEvent *event)
 {
 
 }
