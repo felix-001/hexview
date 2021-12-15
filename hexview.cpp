@@ -17,8 +17,8 @@ enum {
 class HexView : public QAbstractScrollArea 
 {
 private:
-	int char_w_;
-	int char_h_;
+	int font_width_;
+	int font_height_;
 	int hex_pos_;
 	int ascii_pos_;
 	int first_line_pos_;
@@ -43,24 +43,22 @@ HexView::HexView():
 	sel_start_(-1),
 	sel_end_(-1)
 {
-	setFont(QFont("Courier", 13));
-	setFocusPolicy(Qt::StrongFocus);
+	setFont(QFont("Menlo", 13));
+	//setFocusPolicy(Qt::StrongFocus);
 
-	char_w_ = fontMetrics().horizontalAdvance(QLatin1Char('9'));
-	//char_h_ = fontMetrics().height();
-	QFontMetrics fm(QFont("Courier", 13));
-	char_h_ = fm.height();
-	hex_pos_ = kAddrStartPos + kAddrAreaLen*char_w_ + kGapAddrAreaHexArea;
+	font_width_ = fontMetrics().horizontalAdvance("M");
+	font_height_ = fontMetrics().height();
+	hex_pos_ = kAddrStartPos + kAddrAreaLen*font_width_ + kGapAddrAreaHexArea;
 	first_line_pos_ = hex_pos_ - (kGapAddrAreaHexArea / 2);
 	// -1 : 最后一个空格
-	ascii_pos_ = hex_pos_ + (kBytesPerLine*3-1)*char_w_ + kGapHexAreaAsciiArea;
+	ascii_pos_ = hex_pos_ + (kBytesPerLine*3-1)*font_width_ + kGapHexAreaAsciiArea;
 	second_line_pos_ = ascii_pos_ - (kGapHexAreaAsciiArea / 2);
 
 }
 
 void HexView::drawBasic(QPainter *painter, QPaintEvent *event)
 {
-	verticalScrollBar()->setPageStep(viewport()->size().height() / char_h_);
+	verticalScrollBar()->setPageStep(viewport()->size().height() / font_height_);
 	verticalScrollBar()->setRange(0, 30);
 	painter->drawLine(first_line_pos_, event->rect().top(), first_line_pos_, height());
 	painter->drawLine(second_line_pos_, event->rect().top(), second_line_pos_, height());
@@ -86,22 +84,24 @@ void HexView::paintEvent(QPaintEvent *event)
 	//printf("lineIdx:%d\n", lineIdx);
 	for (int line = lineIdx; line < nbLine; line++) {
 		QString addr = QString("%1").arg(line * kBytesPerLine, 8, 16, QChar('0'));
-		int y = (line-lineIdx+1)*char_h_;
-		painter.drawText(kAddrStartPos, y, addr);
+		//int y = (line-lineIdx+1)*font_height_;
+		int y = (line-lineIdx)*font_height_;
+		painter.drawText(kAddrStartPos, y, addr.length()*font_width_, font_height_, Qt::AlignTop, addr);
 		for (int i = 0; i<kBytesPerLine; i++) {
 			int offset = (line - lineIdx)*kBytesPerLine + i;
-			int x = hex_pos_ + i*3*char_w_;
+			int x = hex_pos_ + i*3*font_width_;
 			if (isSelected(offset)) {
-				QColor color = Qt::gray; //palette().color(QPalette::Active, QPalette::Highlight);
-				painter.fillRect(x, y-char_h_, char_w_*3, char_h_, color);
+				QColor color = palette().color(QPalette::Active, QPalette::Highlight);
+				QRectF rect(x, y, font_width_*3, font_height_);
+				painter.fillRect(rect, color);
 			}
 			char c = data_.at(offset);
 			QString hex = QString::number(c, 16).toUpper();
-			painter.drawText(x, y, hex);
+			painter.drawText(x, y, font_width_*2, font_height_, Qt::AlignTop, hex);
 			if ((c < 0x20) || (c > 0x7e)) {
 				c = '.';
 			}
-			painter.drawText(ascii_pos_ + i*char_w_, y, QString(c));
+			painter.drawText(ascii_pos_ + i*font_width_, y, font_width_, font_height_, Qt::AlignTop, QString(c));
 		}
 	}
 }
