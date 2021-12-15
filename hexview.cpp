@@ -101,16 +101,30 @@ void HexView::paintEvent(QPaintEvent *event)
 			if ((c < 0x20) || (c > 0x7e)) {
 				c = '.';
 			}
+			if (isSelected(offset)) {
+				QColor color = palette().color(QPalette::Active, QPalette::Highlight);
+				QRectF rect(ascii_pos_ + i*font_width_, y, font_width_, font_height_);
+				painter.fillRect(rect, color);
+			}
 			painter.drawText(ascii_pos_ + i*font_width_, y, font_width_, font_height_, Qt::AlignTop, QString(c));
 		}
 	}
 }
 
+// TODO:
+// 1. 滚动，根据数据量的大小
+// 2. 支持hex搜索
+// 	2.1 表格首先跳到对应的item
+//	2.2 hex view显示相应的条目，搜索的hex高亮
+// 3. 指定offset查看
+//	3.1 表格先跳到对应的item
+//	3.2 hex view显示相应的条目
+// 4. isSelected是否需要使用坐标的偏移
 int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
 	QMainWindow window;
-	window.setMinimumSize(700, 700);
+	window.setMinimumSize(630, 700);
 	window.setWindowTitle("hexview");
 	HexView *hexView = new HexView;
 	hexView->setData(QByteArray("hello world, this is a test, good luck, fast food place"));
