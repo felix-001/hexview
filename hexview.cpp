@@ -33,10 +33,12 @@ public:
 	void setData(QByteArray data){ data_ = data; }
 	void setSelection(int start, int end){ sel_start_ = start; sel_end_ = end; }
 protected:
-	void paintEvent(QPaintEvent *event);
+	void paintEvent(QPaintEvent *event) override;
+	void mousePressEvent(QMouseEvent *event) override;
 private:
 	void drawBasic(QPainter *painter, QPaintEvent *event);
 	bool isSelected(int offset);
+	int cursorOffset(QPoint point);
 };
 
 HexView::HexView():
@@ -73,6 +75,35 @@ bool HexView::isSelected(int offset)
 		return false;
 	}
 	return (offset >= sel_start_ && offset <= sel_end_);
+}
+
+// 3 = 两个hex字符+一个空格
+#define CHARS_PER_HEX (3)
+// 光标所在字节在整个buf的偏移
+int HexView::cursorOffset(QPoint point)
+{
+	int hex_end_pos = ascii_pos_ - kGapHexAreaAsciiArea;
+	if (point.x() < hex_pos_ || point.x() > hex_end_pos) {
+		return -1;
+	}
+	int x = (point.x() - hex_pos_)/font_width_;
+	// 一个hex在屏幕上显示的是两个字符
+	x /= CHARS_PER_HEX;
+	if (x%CHARS_PER_HEX) {
+		x++;
+	}
+	// line_idx是被滚动条隐藏的部分
+	int line_idx = verticalScrollBar() -> value();
+	int y = (point.y()/font_height_)*kBytesPerLine;
+	int offset = x + y + line_idx*kBytesPerLine;
+	return offset;
+}
+
+void HexView::mousePressEvent(QMouseEvent *event)
+{
+	int offset = cursorOffset(event->pos());
+	setSelection(offset, offset);
+	viewport()->update();
 }
 
 void HexView::paintEvent(QPaintEvent *event)

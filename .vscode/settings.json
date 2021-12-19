@@ -13,6 +13,7 @@
 		"unordered_map": "cpp",
 		"utility": "cpp",
 		"vector": "cpp",
-		"complex": "cpp"
+		"complex": "cpp",
+		"limits": "cpp"
 	}
 }
