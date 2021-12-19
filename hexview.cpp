@@ -89,9 +89,6 @@ int HexView::cursorOffset(QPoint point)
 	int x = (point.x() - hex_pos_)/font_width_;
 	// 一个hex在屏幕上显示的是两个字符
 	x /= CHARS_PER_HEX;
-	if (x%CHARS_PER_HEX) {
-		x++;
-	}
 	// line_idx是被滚动条隐藏的部分
 	int line_idx = verticalScrollBar() -> value();
 	int y = (point.y()/font_height_)*kBytesPerLine;
@@ -159,7 +156,7 @@ int main(int argc, char *argv[])
 	window.setWindowTitle("hexview");
 	HexView *hexView = new HexView;
 	hexView->setData(QByteArray("hello world, this is a test, good luck, fast food place"));
-	hexView->setSelection(10, 28);
+	//hexView->setSelection(10, 28);
 	window.setCentralWidget(hexView);
 	window.show();
 	return app.exec();
