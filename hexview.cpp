@@ -14,6 +14,8 @@ enum {
 	kAddrStartPos        = 8,  // 地址区域偏移
 };
 
+#define log(args...) printf("%s %d ", __FILE__, __LINE__);printf(args);printf("\n")
+
 class HexView : public QAbstractScrollArea 
 {
 private:
@@ -31,13 +33,19 @@ public:
 	~HexView(){}
 public:
 	void setData(QByteArray data){ data_ = data; }
-	void setSelection(int start, int end){ sel_start_ = start; sel_end_ = end; }
+	void setSelection(int start, int end){ 
+		sel_start_ = start; 
+		sel_end_ = end;
+		//log("start:%d end:%d", sel_start_, sel_end_);
+	}
 protected:
 	void paintEvent(QPaintEvent *event) override;
 	void mousePressEvent(QMouseEvent *event) override;
+	void mouseMoveEvent(QMouseEvent * event) override;
 private:
 	void drawBasic(QPainter *painter, QPaintEvent *event);
 	bool isSelected(int offset);
+	bool isSelectedEnd(int offset);
 	int cursorOffset(QPoint point);
 };
 
@@ -77,6 +85,14 @@ bool HexView::isSelected(int offset)
 	return (offset >= sel_start_ && offset <= sel_end_);
 }
 
+bool HexView::isSelectedEnd(int offset)
+{
+	if (offset == sel_end_) {
+		return true;
+	}
+	return false;
+}
+
 // 3 = 两个hex字符+一个空格
 #define CHARS_PER_HEX (3)
 // 光标所在字节在整个buf的偏移
@@ -98,10 +114,24 @@ int HexView::cursorOffset(QPoint point)
 
 void HexView::mousePressEvent(QMouseEvent *event)
 {
+	//log("mousePressEvent");
 	int offset = cursorOffset(event->pos());
 	setSelection(offset, offset);
 	viewport()->update();
 }
+
+void HexView::mouseMoveEvent(QMouseEvent * event)
+{
+	//log("mouseMoveEvent");
+	int offset = cursorOffset(event->pos());
+	if (offset > sel_start_) {
+		sel_end_ = offset;
+	} else {
+		sel_start_ = offset;
+	}
+	viewport()->update();
+}
+
 
 void HexView::paintEvent(QPaintEvent *event)
 {
@@ -120,7 +150,11 @@ void HexView::paintEvent(QPaintEvent *event)
 			int x = hex_pos_ + i*3*font_width_;
 			if (isSelected(offset)) {
 				QColor color = palette().color(QPalette::Active, QPalette::Highlight);
-				QRectF rect(x, y, font_width_*3, font_height_);
+				int w = font_width_*3;
+				if (isSelectedEnd(offset)) {
+					w = font_width_*2;
+				}
+				QRectF rect(x, y, w, font_height_);
 				painter.fillRect(rect, color);
 			}
 			char c = data_.at(offset);
@@ -155,7 +189,20 @@ int main(int argc, char *argv[])
 	window.setMinimumSize(630, 700);
 	window.setWindowTitle("hexview");
 	HexView *hexView = new HexView;
-	hexView->setData(QByteArray("hello world, this is a test, good luck, fast food place"));
+	hexView->setData(QByteArray("hello world, this is a test, good luck, fast food place"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"));
 	//hexView->setSelection(10, 28);
 	window.setCentralWidget(hexView);
 	window.show();
