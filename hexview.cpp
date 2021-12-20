@@ -3,6 +3,7 @@
 #include <QScrollBar>
 #include <QPainter>
 #include <QPaintEvent>
+#include <QMenu>
 #include <QAbstractScrollArea>
 #include <stdio.h>
 
@@ -42,11 +43,15 @@ protected:
 	void paintEvent(QPaintEvent *event) override;
 	void mousePressEvent(QMouseEvent *event) override;
 	void mouseMoveEvent(QMouseEvent * event) override;
+	void contextMenuEvent(QContextMenuEvent *event) override;
 private:
 	void drawBasic(QPainter *painter, QPaintEvent *event);
 	bool isSelected(int offset);
 	bool isSelectedEnd(int offset);
 	int cursorOffset(QPoint point);
+public Q_SLOTS:
+	void copyHex();
+	void copyAscii();
 };
 
 HexView::HexView():
@@ -114,6 +119,9 @@ int HexView::cursorOffset(QPoint point)
 
 void HexView::mousePressEvent(QMouseEvent *event)
 {
+	if (event->button() == Qt::RightButton) {
+		return;
+	}
 	//log("mousePressEvent");
 	int offset = cursorOffset(event->pos());
 	setSelection(offset, offset);
@@ -171,6 +179,36 @@ void HexView::paintEvent(QPaintEvent *event)
 			painter.drawText(ascii_pos_ + i*font_width_, y, font_width_, font_height_, Qt::AlignTop, QString(c));
 		}
 	}
+}
+
+template <class Func>
+QAction *add_item_to_menu(QMenu *menu, const QString &caption, bool checked, Func func)
+{
+	auto action = new QAction(caption, menu);
+	action->setCheckable(true);
+	action->setChecked(checked);
+	menu->addAction(action);
+	QObject::connect(action, &QAction::toggled, func);
+	return action;
+}
+
+void HexView::contextMenuEvent(QContextMenuEvent *event)
+{
+	auto menu = new QMenu(this);
+	menu->addAction(tr("&Copy as Hex Dump"), this, SLOT(copyHex()));
+	menu->addAction(tr("&Copy as Text"), this, SLOT(copyAscii()));
+	menu->exec(event->globalPos());
+	delete menu;
+}
+
+void HexView::copyAscii()
+{
+
+}
+
+void HexView::copyHex()
+{
+
 }
 
 // TODO:
