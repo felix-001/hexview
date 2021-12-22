@@ -5,6 +5,7 @@
 #include <QPaintEvent>
 #include <QMenu>
 #include <QAbstractScrollArea>
+#include <QtGlobal>
 #include <stdio.h>
 
 enum {
@@ -183,7 +184,7 @@ void HexView::paintEvent(QPaintEvent *event)
 
 void HexView::contextMenuEvent(QContextMenuEvent *event)
 {
-	QMenu *const menu = new QMenu(this);
+	QMenu * menu = new QMenu(this);
 	menu->addAction(tr("&Copy as Hex Dump"), this, SLOT(copyHex()));
 	menu->addAction(tr("&Copy as Text"), this, SLOT(copyAscii()));
 	menu->exec(event->globalPos());
