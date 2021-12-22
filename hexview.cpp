@@ -192,12 +192,12 @@ void HexView::contextMenuEvent(QContextMenuEvent *event)
 
 void HexView::copyAscii()
 {
-
+	printf("copyAscii");
 }
 
 void HexView::copyHex()
 {
-
+	printf("copyHex");
 }
 
 // TODO:
