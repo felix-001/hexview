@@ -39,6 +39,9 @@ public:
 		sel_end_ = end;
 		//log("start:%d end:%d", sel_start_, sel_end_);
 	}
+public Q_SLOTS:
+	void copyHex();
+	void copyAscii();
 protected:
 	void paintEvent(QPaintEvent *event) override;
 	void mousePressEvent(QMouseEvent *event) override;
@@ -49,9 +52,6 @@ private:
 	bool isSelected(int offset);
 	bool isSelectedEnd(int offset);
 	int cursorOffset(QPoint point);
-public Q_SLOTS:
-	void copyHex();
-	void copyAscii();
 };
 
 HexView::HexView():
@@ -181,24 +181,13 @@ void HexView::paintEvent(QPaintEvent *event)
 	}
 }
 
-template <class Func>
-QAction *add_item_to_menu(QMenu *menu, const QString &caption, bool checked, Func func)
-{
-	auto action = new QAction(caption, menu);
-	action->setCheckable(true);
-	action->setChecked(checked);
-	menu->addAction(action);
-	QObject::connect(action, &QAction::toggled, func);
-	return action;
-}
-
 void HexView::contextMenuEvent(QContextMenuEvent *event)
 {
-	auto menu = new QMenu(this);
+	QMenu *const menu = new QMenu(this);
 	menu->addAction(tr("&Copy as Hex Dump"), this, SLOT(copyHex()));
 	menu->addAction(tr("&Copy as Text"), this, SLOT(copyAscii()));
 	menu->exec(event->globalPos());
-	delete menu;
+	//delete menu;
 }
 
 void HexView::copyAscii()
