@@ -33,15 +33,16 @@ QMAKE_CXX.COMPILER_MACROS = \
     QMAKE_GCC_MINOR_VERSION \
     QMAKE_GCC_PATCH_VERSION
 QMAKE_CXX.INCDIRS = \
+    /usr/local/Cellar/openssl@1.1/1.1.1l_1/include \
     /usr/local/Cellar/sdl/1.2.15_3/include/SDL \
-    /usr/local/Cellar/qt/5.15.2/include \
     /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 \
     /Library/Developer/CommandLineTools/usr/lib/clang/13.0.0/include \
     /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include \
     /Library/Developer/CommandLineTools/usr/include
 QMAKE_CXX.LIBDIRS = \
+    /usr/local/Cellar/openssl@1.1/1.1.1l_1/lib \
     /usr/local/Cellar/sdl/1.2.15_3/lib \
-    /usr/local/Cellar/qt/5.15.2/lib \
+    /usr/local/Cellar/ffmpeg/4.4_2/lib \
     /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
 QMAKE_MAC_SDK.macosx.SDKVersion = 11.3
 QMAKE_MAC_SDK.macosx.Path = /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk

@@ -20,6 +20,7 @@ enum {
 
 class HexView : public QAbstractScrollArea 
 {
+	Q_OBJECT
 private:
 	int font_width_;
 	int font_height_;
@@ -56,6 +57,7 @@ private:
 };
 
 HexView::HexView():
+	QAbstractScrollArea(),
 	sel_start_(-1),
 	sel_end_(-1)
 {
