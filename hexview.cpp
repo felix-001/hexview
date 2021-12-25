@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QClipboard>
 #include <QMainWindow>
 #include <QScrollBar>
 #include <QPainter>
@@ -7,6 +8,7 @@
 #include <QAbstractScrollArea>
 #include <QtGlobal>
 #include <stdio.h>
+#include "hexview.h"
 
 enum {
 	kAddrAreaLen         = 8,
@@ -17,44 +19,6 @@ enum {
 };
 
 #define log(args...) printf("%s %d ", __FILE__, __LINE__);printf(args);printf("\n")
-
-class HexView : public QAbstractScrollArea 
-{
-	Q_OBJECT
-private:
-	int font_width_;
-	int font_height_;
-	int hex_pos_;
-	int ascii_pos_;
-	int first_line_pos_;
-	int second_line_pos_;
-	int sel_start_;
-	int sel_end_;
-	QByteArray data_;
-public:
-	HexView();
-	~HexView(){}
-public:
-	void setData(QByteArray data){ data_ = data; }
-	void setSelection(int start, int end){ 
-		sel_start_ = start; 
-		sel_end_ = end;
-		//log("start:%d end:%d", sel_start_, sel_end_);
-	}
-public Q_SLOTS:
-	void copyHex();
-	void copyAscii();
-protected:
-	void paintEvent(QPaintEvent *event) override;
-	void mousePressEvent(QMouseEvent *event) override;
-	void mouseMoveEvent(QMouseEvent * event) override;
-	void contextMenuEvent(QContextMenuEvent *event) override;
-private:
-	void drawBasic(QPainter *painter, QPaintEvent *event);
-	bool isSelected(int offset);
-	bool isSelectedEnd(int offset);
-	int cursorOffset(QPoint point);
-};
 
 HexView::HexView():
 	QAbstractScrollArea(),
@@ -193,14 +157,41 @@ void HexView::contextMenuEvent(QContextMenuEvent *event)
 	//delete menu;
 }
 
+bool HexView::hasSelectedText()
+{
+	if (sel_start_ == -1) {
+		return false;
+	}
+	if (sel_end_ == -1) {
+		return false;
+	}
+	return true;
+}
+
 void HexView::copyAscii()
 {
-	printf("copyAscii");
 }
 
 void HexView::copyHex()
 {
-	printf("copyHex");
+	int start = std::min(sel_start_, sel_end_);
+	int end = std::max(sel_start_, sel_end_);
+	int offset = start;
+	QString hex = "";
+	while(offset <= end) {
+		char c = data_.at(offset);
+		hex += QString::number(c, 16).toUpper();	
+		if ((offset - start + 1)%kBytesPerLine == 0) {
+			hex += "\n";
+		} else {
+			hex += " ";
+		}
+		offset++;
+	}
+	if ((offset - start + 1)%kBytesPerLine != 0) {
+		hex += "\n";
+	}
+	QApplication::clipboard()->setText(hex);
 }
 
 // TODO:

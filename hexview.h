@@ -43,4 +43,5 @@ private:
 	bool isSelected(int offset);
 	bool isSelectedEnd(int offset);
 	int cursorOffset(QPoint point);
+	bool hasSelectedText();
 };
