@@ -49,4 +49,5 @@ private:
 	void drawAscii(QPainter &painter, int offset, int i, int y, char c);
 	void drawLine(QPainter &painter, int lineOffset, int y);
 	void drawAddr(QPainter &painter, int line, int y);
+	void drawHexHighlight(QPainter &painter, int offset, int x, int y);
 };

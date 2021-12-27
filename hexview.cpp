@@ -110,17 +110,22 @@ void HexView::mouseMoveEvent(QMouseEvent * event)
 	viewport()->update();
 }
 
+void HexView::drawHexHighlight(QPainter &painter, int offset, int x, int y)
+{
+	QColor color = palette().color(QPalette::Active, QPalette::Highlight);
+	int w = font_width_*3;
+	if (isSelectedEnd(offset)) {
+		w = font_width_*2;
+	}
+	QRectF rect(x, y, w, font_height_);
+	painter.fillRect(rect, color);
+}
+
 void HexView::drawHex(QPainter &painter, int offset, int i, int y, char c)
 {
 	int x = hex_pos_ + i*3*font_width_;
 	if (isSelected(offset)) {
-		QColor color = palette().color(QPalette::Active, QPalette::Highlight);
-		int w = font_width_*3;
-		if (isSelectedEnd(offset)) {
-			w = font_width_*2;
-		}
-		QRectF rect(x, y, w, font_height_);
-		painter.fillRect(rect, color);
+		drawHexHighlight(painter, offset, x, y);	
 	}
 	QString hex = QString::number(c, 16).toUpper();
 	painter.drawText(x, y, font_width_*2, font_height_, Qt::AlignTop, hex);
