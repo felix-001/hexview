@@ -45,4 +45,8 @@ private:
 	int cursorOffset(QPoint point);
 	bool hasSelectedText();
 	void fillWithSpace(int offset, QString &hex);
+	void drawHex(QPainter &painter, int offse, int i, int y, char c);
+	void drawAscii(QPainter &painter, int offset, int i, int y, char c);
+	void drawLine(QPainter &painter, int lineOffset, int y);
+	void drawAddr(QPainter &painter, int line, int y);
 };

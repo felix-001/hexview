@@ -26,7 +26,6 @@ HexView::HexView():
 	sel_end_(-1)
 {
 	setFont(QFont("Menlo", 13));
-	//setFocusPolicy(Qt::StrongFocus);
 
 	font_width_ = fontMetrics().horizontalAdvance("M");
 	font_height_ = fontMetrics().height();
@@ -40,8 +39,12 @@ HexView::HexView():
 
 void HexView::drawBasic(QPainter *painter, QPaintEvent *event)
 {
-	verticalScrollBar()->setPageStep(viewport()->size().height() / font_height_);
-	verticalScrollBar()->setRange(0, 30);
+	int totalLines = data_.size() / kBytesPerLine;
+	if(data_.size() % kBytesPerLine)
+		totalLines++;
+	int viewportLines = viewport()->size().height() / font_height_;
+	verticalScrollBar()->setPageStep(viewportLines);
+	verticalScrollBar()->setRange(0, totalLines - viewportLines + 1);
 	painter->drawLine(first_line_pos_, event->rect().top(), first_line_pos_, height());
 	painter->drawLine(second_line_pos_, event->rect().top(), second_line_pos_, height());
 }
@@ -107,6 +110,50 @@ void HexView::mouseMoveEvent(QMouseEvent * event)
 	viewport()->update();
 }
 
+void HexView::drawHex(QPainter &painter, int offset, int i, int y, char c)
+{
+	int x = hex_pos_ + i*3*font_width_;
+	if (isSelected(offset)) {
+		QColor color = palette().color(QPalette::Active, QPalette::Highlight);
+		int w = font_width_*3;
+		if (isSelectedEnd(offset)) {
+			w = font_width_*2;
+		}
+		QRectF rect(x, y, w, font_height_);
+		painter.fillRect(rect, color);
+	}
+	QString hex = QString::number(c, 16).toUpper();
+	painter.drawText(x, y, font_width_*2, font_height_, Qt::AlignTop, hex);
+}
+
+void HexView::drawAscii(QPainter &painter, int offset, int i, int y, char c)
+{
+	if ((c < 0x20) || (c > 0x7e)) {
+		c = '.';
+	}
+	if (isSelected(offset)) {
+		QColor color = palette().color(QPalette::Active, QPalette::Highlight);
+		QRectF rect(ascii_pos_ + i*font_width_, y, font_width_, font_height_);
+		painter.fillRect(rect, color);
+	}
+	painter.drawText(ascii_pos_ + i*font_width_, y, font_width_, font_height_, Qt::AlignTop, QString(c));
+}
+
+void HexView::drawLine(QPainter &painter, int lineOffset, int y)
+{
+	for (int i = 0; i<kBytesPerLine; i++) {
+		int offset = lineOffset*kBytesPerLine + i;
+		char c = data_.at(offset);
+		drawHex(painter, offset, i, y, c);	
+		drawAscii(painter, offset, i, y, c);	
+	}
+}
+
+void HexView::drawAddr(QPainter &painter, int line, int y)
+{
+	QString addr = QString("%1").arg(line * kBytesPerLine, 8, 16, QChar('0'));
+	painter.drawText(kAddrStartPos, y, addr.length()*font_width_, font_height_, Qt::AlignTop, addr);
+}
 
 void HexView::paintEvent(QPaintEvent *event)
 {
@@ -114,37 +161,11 @@ void HexView::paintEvent(QPaintEvent *event)
 	drawBasic(&painter, event);
 	int nbLine = data_.size()/kBytesPerLine;
 	int lineIdx = verticalScrollBar()->value();
-	//printf("lineIdx:%d\n", lineIdx);
+	printf("lineIdx:%d\n", lineIdx);
 	for (int line = lineIdx; line < nbLine; line++) {
-		QString addr = QString("%1").arg(line * kBytesPerLine, 8, 16, QChar('0'));
-		//int y = (line-lineIdx+1)*font_height_;
 		int y = (line-lineIdx)*font_height_;
-		painter.drawText(kAddrStartPos, y, addr.length()*font_width_, font_height_, Qt::AlignTop, addr);
-		for (int i = 0; i<kBytesPerLine; i++) {
-			int offset = (line - lineIdx)*kBytesPerLine + i;
-			int x = hex_pos_ + i*3*font_width_;
-			if (isSelected(offset)) {
-				QColor color = palette().color(QPalette::Active, QPalette::Highlight);
-				int w = font_width_*3;
-				if (isSelectedEnd(offset)) {
-					w = font_width_*2;
-				}
-				QRectF rect(x, y, w, font_height_);
-				painter.fillRect(rect, color);
-			}
-			char c = data_.at(offset);
-			QString hex = QString::number(c, 16).toUpper();
-			painter.drawText(x, y, font_width_*2, font_height_, Qt::AlignTop, hex);
-			if ((c < 0x20) || (c > 0x7e)) {
-				c = '.';
-			}
-			if (isSelected(offset)) {
-				QColor color = palette().color(QPalette::Active, QPalette::Highlight);
-				QRectF rect(ascii_pos_ + i*font_width_, y, font_width_, font_height_);
-				painter.fillRect(rect, color);
-			}
-			painter.drawText(ascii_pos_ + i*font_width_, y, font_width_, font_height_, Qt::AlignTop, QString(c));
-		}
+		drawAddr(painter, line, y);
+		drawLine(painter, line - lineIdx, y);	
 	}
 }
 
@@ -232,6 +253,27 @@ int main(int argc, char *argv[])
 	window.setWindowTitle("hexview");
 	HexView *hexView = new HexView;
 	hexView->setData(QByteArray("hello world, this is a test, good luck, fast food place"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
+				   "hello world, this is a test, good"
 				   "hello world, this is a test, good"
 				   "hello world, this is a test, good"
 				   "hello world, this is a test, good"
