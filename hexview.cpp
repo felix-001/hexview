@@ -170,6 +170,18 @@ bool HexView::hasSelectedText()
 
 void HexView::copyAscii()
 {
+	int start = std::min(sel_start_, sel_end_);
+	int end = std::max(sel_start_, sel_end_);
+	QString ascii = "";
+	while(start <= end) {
+		char c = data_.at(start);
+		if ((c < 0x20) || (c > 0x7e)) {
+			c = '.';
+		}	
+		ascii += c;
+		start++;
+	}
+	QApplication::clipboard()->setText(ascii);
 }
 
 void HexView::fillWithSpace(int offset, QString &hex)
