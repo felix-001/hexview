@@ -171,7 +171,6 @@ void HexView::paintEvent(QPaintEvent *event)
 	drawBasic(&painter, event);
 	int nbLine = data_.size()/kBytesPerLine;
 	int lineIdx = verticalScrollBar()->value();
-	//printf("lineIdx:%d\n", lineIdx);
 	for (int line = lineIdx; line < nbLine; line++) {
 		int y = (line-lineIdx)*font_height_;
 		drawAddr(painter, line, y);
@@ -185,7 +184,7 @@ void HexView::contextMenuEvent(QContextMenuEvent *event)
 	menu->addAction(tr("&Copy as Hex Dump"), this, SLOT(copyHex()));
 	menu->addAction(tr("&Copy as Text"), this, SLOT(copyAscii()));
 	menu->exec(event->globalPos());
-	//delete menu;
+	delete menu;
 }
 
 bool HexView::hasSelectedText()
@@ -260,6 +259,7 @@ void HexView::copyHex()
 // 4. isSelected是否需要使用坐标的偏移
 // 5. Command + A 全选
 // 6. shift + 鼠标左键选择
+// 7. ascii区域右侧的竖线
 int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
