@@ -258,6 +258,8 @@ void HexView::copyHex()
 //	3.1 表格先跳到对应的item
 //	3.2 hex view显示相应的条目
 // 4. isSelected是否需要使用坐标的偏移
+// 5. Command + A 全选
+// 6. shift + 鼠标左键选择
 int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
