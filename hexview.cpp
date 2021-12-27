@@ -44,7 +44,7 @@ void HexView::drawBasic(QPainter *painter, QPaintEvent *event)
 		totalLines++;
 	int viewportLines = viewport()->size().height() / font_height_;
 	verticalScrollBar()->setPageStep(viewportLines);
-	verticalScrollBar()->setRange(0, totalLines - viewportLines + 1);
+	verticalScrollBar()->setRange(0, totalLines - viewportLines);
 	painter->drawLine(first_line_pos_, event->rect().top(), first_line_pos_, height());
 	painter->drawLine(second_line_pos_, event->rect().top(), second_line_pos_, height());
 }
@@ -110,11 +110,16 @@ void HexView::mouseMoveEvent(QMouseEvent * event)
 	viewport()->update();
 }
 
+bool HexView::isLineEnd(int offset)
+{
+	return (offset+1)%kBytesPerLine == 0;
+}
+
 void HexView::drawHexHighlight(QPainter &painter, int offset, int x, int y)
 {
 	QColor color = palette().color(QPalette::Active, QPalette::Highlight);
 	int w = font_width_*3;
-	if (isSelectedEnd(offset)) {
+	if (isSelectedEnd(offset) || isLineEnd(offset)) {
 		w = font_width_*2;
 	}
 	QRectF rect(x, y, w, font_height_);
@@ -144,13 +149,13 @@ void HexView::drawAscii(QPainter &painter, int offset, int i, int y, char c)
 	painter.drawText(ascii_pos_ + i*font_width_, y, font_width_, font_height_, Qt::AlignTop, QString(c));
 }
 
-void HexView::drawLine(QPainter &painter, int lineOffset, int y)
+void HexView::drawLine(QPainter &painter, int line, int y)
 {
 	for (int i = 0; i<kBytesPerLine; i++) {
-		int offset = lineOffset*kBytesPerLine + i;
+		int offset = line*kBytesPerLine + i;
 		char c = data_.at(offset);
 		drawHex(painter, offset, i, y, c);	
-		drawAscii(painter, offset, i, y, c);	
+		drawAscii(painter, offset, i, y, c);
 	}
 }
 
@@ -166,11 +171,11 @@ void HexView::paintEvent(QPaintEvent *event)
 	drawBasic(&painter, event);
 	int nbLine = data_.size()/kBytesPerLine;
 	int lineIdx = verticalScrollBar()->value();
-	printf("lineIdx:%d\n", lineIdx);
+	//printf("lineIdx:%d\n", lineIdx);
 	for (int line = lineIdx; line < nbLine; line++) {
 		int y = (line-lineIdx)*font_height_;
 		drawAddr(painter, line, y);
-		drawLine(painter, line - lineIdx, y);	
+		drawLine(painter, line, y);	
 	}
 }
 
@@ -212,8 +217,11 @@ void HexView::copyAscii()
 
 void HexView::fillWithSpace(int offset, QString &hex)
 {
-	int nbBytes = kBytesPerLine - offset%kBytesPerLine;
-	for (int i=0; i<nbBytes; i++) {
+	int left = offset%kBytesPerLine;
+	if (!left) {
+		return;
+	}
+	for (int i=0; i<left*3; i++) {
 		hex += " ";
 	}
 }
@@ -228,7 +236,7 @@ void HexView::copyHex()
 	while(offset <= end) {
 		char c = data_.at(offset);
 		hex += QString::number(c, 16).toUpper();	
-		if ((offset + 1)%kBytesPerLine == 0) {
+		if (isLineEnd(offset)) {
 			hex += "\n";
 		} else {
 			hex += " ";

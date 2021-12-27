@@ -28,7 +28,6 @@ public:
 	void setSelection(int start, int end){ 
 		sel_start_ = start; 
 		sel_end_ = end;
-		//log("start:%d end:%d", sel_start_, sel_end_);
 	}
 public Q_SLOTS:
 	void copyHex();
@@ -47,7 +46,8 @@ private:
 	void fillWithSpace(int offset, QString &hex);
 	void drawHex(QPainter &painter, int offse, int i, int y, char c);
 	void drawAscii(QPainter &painter, int offset, int i, int y, char c);
-	void drawLine(QPainter &painter, int lineOffset, int y);
+	void drawLine(QPainter &painter, int line, int y);
 	void drawAddr(QPainter &painter, int line, int y);
 	void drawHexHighlight(QPainter &painter, int offset, int x, int y);
+	bool isLineEnd(int offset);
 };
