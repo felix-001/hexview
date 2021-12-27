@@ -172,16 +172,25 @@ void HexView::copyAscii()
 {
 }
 
+void HexView::fillWithSpace(int offset, QString &hex)
+{
+	int nbBytes = kBytesPerLine - offset%kBytesPerLine;
+	for (int i=0; i<nbBytes; i++) {
+		hex += " ";
+	}
+}
+
 void HexView::copyHex()
 {
 	int start = std::min(sel_start_, sel_end_);
 	int end = std::max(sel_start_, sel_end_);
 	int offset = start;
 	QString hex = "";
+	fillWithSpace(offset, hex);
 	while(offset <= end) {
 		char c = data_.at(offset);
 		hex += QString::number(c, 16).toUpper();	
-		if ((offset - start + 1)%kBytesPerLine == 0) {
+		if ((offset + 1)%kBytesPerLine == 0) {
 			hex += "\n";
 		} else {
 			hex += " ";

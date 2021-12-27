@@ -44,4 +44,5 @@ private:
 	bool isSelectedEnd(int offset);
 	int cursorOffset(QPoint point);
 	bool hasSelectedText();
+	void fillWithSpace(int offset, QString &hex);
 };
